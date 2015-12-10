@@ -55,3 +55,18 @@ docs/_build/
 
 # PyBuilder
 target/
+
+
+# CSV & XLSX Files
+*.csv
+*/**/*.csv
+*.xlsx
+*/**/*.xlsx
+
+
+# Idea stuff
+
+
+
+# Idea stuff
+.idea/
