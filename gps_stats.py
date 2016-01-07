@@ -90,16 +90,21 @@ def process(hash_file, fuel_input, capacity_input, co2, output, stats, traces, f
                     print [orig_coord, dest_coord]
             else:
                 if (c.FECHA[j + 1] != c.FECHA[j]) and tiempo.seconds > 0:  # Si se cambia de fecha:
-                    result.append([c.FECHA[j], str(tiempo.seconds // 3600) + ':' + str((tiempo.seconds // 60) % 60),
-                                   tiempo.seconds / float(3600), dist, dist / (tiempo.seconds / float(3600)), c.CODIGO[
-                                       j]])  # , c.MES[j]]) #Agrega a la base de datos final el acumulado del dia anterior al que va a llegar
+                    date = c.FECHA[j]
+                    time = str(tiempo.seconds // 3600) + ':' + str((tiempo.seconds // 60) % 60)
+                    row = [date, time, tiempo.seconds / float(3600), dist, dist / (tiempo.seconds / float(3600)), c.CODIGO[
+                               j]]
+                    result.append(
+                        row)  # , c.MES[j]]) #Agrega a la base de datos final el acumulado del dia anterior al que va a llegar
                     tiempo = timedelta()
                     dist = 0  # Se reinicializa tiempo y distancia
-        if (len(
-                c.CODIGO) > 1) and tiempo.seconds > 0:  # Si se acaban todas las entradas para el camion y hay mas de una sola entrada, se adjunta la informacion de la ultima fecha a la base de datos
-            result.append([c.FECHA[j], str(tiempo.seconds // 3600) + ':' + str((tiempo.seconds // 60) % 60),
+        if (len(c.CODIGO) > 1) and tiempo.seconds > 0:  # Si se acaban todas las entradas para el camion y hay mas de una sola entrada, se adjunta la informacion de la ultima fecha a la base de datos
+            date = c.FECHA[j]
+            time = str(tiempo.seconds // 3600) + ':' + str((tiempo.seconds // 60) % 60)
+            row = [date, time,
                            tiempo.seconds / float(3600), dist, dist / (tiempo.seconds / float(3600)),
-                           c.CODIGO[j]])  # , c.MES[j]])
+                           c.CODIGO[j]]
+            result.append(row)  # , c.MES[j]])
 
 
     # result = concat([Solution, coords], axis=1)
@@ -163,9 +168,25 @@ def process(hash_file, fuel_input, capacity_input, co2, output, stats, traces, f
     TE.columns = ['emissions']
     database = pd.concat([result, TE], axis=1)
 
-    #pd.DataFrame(database).to_csv(output, index=False)
+    # pd.DataFrame(database).to_csv(output, index=False)
+
+    for i in range(len(database)):
+        database['fecha'][i] = change_date_format(database['fecha'][i], database['tiempo'][i] + ':00')
+
+    for i in range(len(data2)):
+        data2['FECHA'][i] = change_date_format(data2['FECHA'][i], data2['HORA'][i])
+
+
     pd.DataFrame(database).to_csv(stats, index=False)
     pd.DataFrame(data2).to_csv(traces, index=False)
+
+
+def change_date_format(date, time):
+     arr = date.split("-")
+     year = arr[2]
+     month = arr[1]
+     day = arr[0]
+     return "{}-{}-{}T{}Z".format(year, month, day, time)
 
 
 def main(argv):

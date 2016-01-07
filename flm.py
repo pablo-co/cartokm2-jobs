@@ -94,11 +94,6 @@ def process(frequencies_file):
 
     codes = pd.read_csv(frequencies_file)
 
-    plotlycodes = []
-    link = []
-    for i in range(len(costmatrix)):
-        link.append('https://plot.ly/~rafaeles/' + str(plotlycodes[i]) + '.png')
-
     Solution.columns = ['p' + str(i) for i in range(len(costmatrix))]
     os.chdir(os.path.dirname(os.getcwd()))
     centr = pd.read_csv('./6DistanceMatrices/Input/Centroids.csv')
@@ -109,12 +104,50 @@ def process(frequencies_file):
     droppercl = pd.DataFrame(droppercl)
     clients = pd.DataFrame(clients)
     durpercl = pd.DataFrame(durpercl)
-    link = pd.DataFrame(link)
 
-    stopsdataset = concat([coords, stdmean, dropsize, droppercl, clients, durpercl, link], axis=1)
+    stopsdataset = concat([coords, stdmean, dropsize, droppercl, clients, durpercl,], axis=1)
     stopsdataset.columns = ['latitud', 'longitud', 'sigma', 'mean_duration', 'drop_size_per_number_of_clientes',
-                            'dropsize_per_stop', 'clientes', 'duration_per_number_of_clients', 'link']
+                            'dropsize_per_stop', 'clientes', 'duration_per_number_of_clients']
     pd.DataFrame(result).to_csv(
         "./8Optimization/Input/SolutionFLM2.csv")  # , header=['p'+str(i) for i in range(len(costmatrix)), 'latitud', 'longitud'])
     pd.DataFrame(result).to_csv("./Km2Datasets/Scenario/Km2Solution.csv")
     pd.DataFrame(stopsdataset).to_csv('./Km2Datasets/Stops/Km2Stops.csv', index=False)
+
+def main(argv):
+    input = "input.csv"
+    output = "output.csv"
+    polygon_file_name = "polygon.csv"
+    client_file_name = "clients.csv"
+    distance_stops_to_stops = "distance_stops_to_stops.csv"
+    time_stops_to_stops = "time_stops_to_stops.csv"
+    distance_stops_to_customers = "distance_stops_to_customers.csv"
+    time_stops_to_customer = "time_stops_to_customer.csv"
+
+    hash_name = ''.join(random.choice(string.ascii_uppercase) for i in range(24))
+    hash_name += ".csv"
+
+    try:
+        opts, args = getopt.getopt(argv, "c:o:p:t:v:x:y:z:",
+                                   ["centroids=", "output=", "polygon=", "clients=", "distance_stops_to_stops=",
+                                    "time_stops_to_stops=", "distance_stops_to_customers=", "time_stops_to_customers="])
+    except getopt.GetoptError, e:
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-c", "--centroids"):
+            input = arg
+        elif opt in ("-o", "--output"):
+            output = arg
+        elif opt in ("-p", "--polygon"):
+            polygon_file_name = arg
+        elif opt in ("-y", "--distance_stops_to_customers"):
+            distance_stops_to_customers = arg
+            time_stops_to_customer = arg
+
+    create_depot(input, polygon_file_name, hash_name)
+
+    process(distance_stops_to_customers)
+
+    os.remove(hash_name)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -140,13 +140,13 @@ def main(argv):
     hash_name += ".csv"
 
     try:
-        opts, args = getopt.getopt(argv, "i:o:p:t:v:x:y:z:",
-                                   ["input=", "output=", "polygon=", "clients=", "distance_stops_to_stops=",
-                                    "time_stops_to_stops=", "distance_stops_to_customers", "time_stops_to_customers="])
-    except getopt.GetoptError:
+        opts, args = getopt.getopt(argv, "c:o:p:t:v:x:y:z:",
+                                   ["centroids=", "output=", "polygon=", "clients=", "distance_stops_to_stops=",
+                                    "time_stops_to_stops=", "distance_stops_to_customers=", "time_stops_to_customers="])
+    except getopt.GetoptError, e:
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ("-i", "--input"):
+        if opt in ("-c", "--centroids"):
             input = arg
         elif opt in ("-o", "--output"):
             output = arg
